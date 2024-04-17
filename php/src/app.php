@@ -3,6 +3,7 @@ class App
 {
     private $route;
     private $routes;
+    private $sessionController;
 
     public function __construct()
     {
@@ -26,6 +27,16 @@ class App
         $this->routes = $routes;
     }
 
+    private function getSessionController(): SessionController
+    {
+        return $this->sessionController;
+    }
+
+    private function setSessionController($sessionController)
+    {
+        $this->sessionController = $sessionController;
+    }
+
     private function getRoutes($option = '*')
     {
         if ($option === '*') {
@@ -40,6 +51,18 @@ class App
     private function loadRoute()
     {
         $this->setRoute($this->getRoutes($this->getRoute()->getName()));
+    }
+
+    private function checkSessionController()
+    {
+        return ($this->getSessionController() !== null) ? true : false;
+    }
+
+    private function checkUserSession()
+    {
+        if ($this->checkSessionController() === false) {
+            $this->loadSessionController();
+        }
     }
 
     public function execute(): void
