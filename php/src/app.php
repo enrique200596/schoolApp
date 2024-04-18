@@ -55,7 +55,7 @@ class App
 
     private function checkSessionController()
     {
-        return ($this->getSessionController() !== null) ? true : false;
+        return $this->getSessionController() !== null;
     }
 
     private function checkUserSession()
@@ -130,5 +130,18 @@ class App
         $this->addRoute('error', 'invalidRoute', function () {
             echo "RUTA INVALIDA";
         });
+    }
+
+    private function checkUserAccessWithRouteAccessControl()
+    {
+        return password_verify($this->getUserAccessKey(),$this->getRoute()->getAccessKey());
+    }
+
+    private function getUserAccessKey()
+    {
+        if($this->checkSessionController()===false){
+            $this->setSessionController(new SessionController());
+        }
+        $this->getSessionController()->getPasswordOfLoggedInUser();
     }
 }

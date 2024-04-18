@@ -78,13 +78,13 @@ class Route
         }
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->getObject() . '-' . $this->getProcess();
     }
 
-    public function checkAcessControl()
+    public function checkAcessControl(): bool
     {
-        return ($this->getAccessControl() === null) ? false : true;
+        return !(($this->getAccessControl() === null));
     }
 }
