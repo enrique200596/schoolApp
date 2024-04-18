@@ -13,7 +13,7 @@ class SessionController
         return $this->getData('user');
     }
 
-    private function getData(string $dataName)
+    public function getData(string $dataName)
     {
         if ($this->checkData($dataName) === true) {
             return $_SESSION[$dataName];

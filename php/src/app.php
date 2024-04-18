@@ -1,147 +1,133 @@
 <?php
+require_once 'route.php';
+require_once 'routeController.php';
+require_once 'sessionController.php';
+require_once 'user.php';
+require_once 'view.php';
+
 class App
 {
-    private $route;
-    private $routes;
-    private $sessionController;
+    private Route $route;
+    private RouteController $routeController;
+    private SessionController $sessionController;
 
     public function __construct()
     {
         $this->route = new Route();
-        $this->routes = [];
+        $this->routeController = new RouteController();
         $this->initializeRoutes();
+        $this->sessionController = new SessionController();
     }
 
-    private function setRoute($route)
+    private function initializeRoutes()
     {
-        $this->route = $route;
+        $this->routeController->addRoute(new Route('error', 'accessDenied', ''));
+        $this->routeController->addRoute(new Route('error', 'invalidRoute', ''));
+        $this->routeController->addRoute(new Route('view', 'homeAdministrator', 'Administrator'));
+        $this->routeController->addRoute(new Route('view', 'homeExecutive', 'Executive'));
+        $this->routeController->addRoute(new Route('view', 'signIn', ''));
     }
 
-    private function getRoute(): Route
+    private function identifyRoute()
     {
-        return $this->route;
+        $this->route->identifyObject();
+        $this->route->identifyProcess();
     }
 
-    private function setRoutes($routes)
+    private function validateRoute()
     {
-        $this->routes = $routes;
+        return $this->routeController->checkRoute($this->route->getName());
     }
 
-    private function getSessionController(): SessionController
+    private function redirectRoute(string $routeName)
     {
-        return $this->sessionController;
+        if ($this->validateRoute($routeName) === false) {
+            $routeName = 'error-invalidRoute';
+        }
+        header('Location: ' . $this->routeController->getRoute($routeName)->getUrl());
+        die();
     }
 
-    private function setSessionController($sessionController)
+    private function checkRouteAccessKey()
     {
-        $this->sessionController = $sessionController;
-    }
-
-    private function getRoutes($option = '*')
-    {
-        if ($option === '*') {
-            return $this->routes;
-        } else if ($option !== '*' && $option !== '' && $this->validateRoute($option) === true) {
-            return $this->routes[$option];
+        if (empty($this->route->getAccessKey()) === true) {
+            return false;
         } else {
-            return new Route('error', 'invalidRoute');
+            return true;
+        }
+    }
+
+    private function checkUserSession()
+    {
+        if ($this->sessionController->getData('user') === null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private function checkUserAccessKeyRouteAccessKey()
+    {
+        return password_verify($this->route->getaccessKey(), $this->sessionController->getData('user')->getAccessKey());
+    }
+
+    private function errorInvalidRoute()
+    {
+        echo "RUTA NO VALIDA";
+    }
+
+    private function nonExistentRoute()
+    {
+        echo "RUTA INEXISTENTE";
+    }
+    private function viewSignIn()
+    {
+        $this->viewController = new ViewController();
+        $this->viewController->showView('signIn');
+    }
+    private function executeFunction(string $routeName)
+    {
+        switch ($routeName) {
+            case 'error-invalidRoute':
+                $this->errorInvalidRoute();
+                die();
+
+            case 'view-signIn':
+                $this->viewSignIn();
+                die();
+
+            default:
+                $this->nonExistentRoute();
+                die();
         }
     }
 
     private function loadRoute()
     {
-        $this->setRoute($this->getRoutes($this->getRoute()->getName()));
+        $this->route = $this->routeController->getRoute($this->route->getName());
     }
 
-    private function checkSessionController()
-    {
-        return $this->getSessionController() !== null;
-    }
-
-    private function checkUserSession()
-    {
-        if ($this->checkSessionController() === false) {
-            $this->loadSessionController();
-        }
-    }
-
-    private function checkRouteAccessControl(): bool
-    {
-        return $this->getRoute()->checkAcessControl();
-    }
-
-    public function execute(): void
+    public function processRequest()
     {
         $this->identifyRoute();
-
-        if ($this->validateRoute($this->getRoute()->getName()) === false) {
+        if ($this->validateRoute() === false) {
             $this->redirectRoute('error-invalidRoute');
         } else {
             $this->loadRoute();
-        }
-
-        $this->checkUserSession();
-
-        if ($this->checkRouteAccessControl() === true) {
-
-            if ($this->checkUserAccessWithRouteAccessControl() === false) {
-                $this->redirectRoute('error-accessDenied');
+            if ($this->checkRouteAccessKey() === true) {
+                if ($this->checkUserSession() === true) {
+                    if ($this->checkUserAccessKeyRouteAccessKey() === false) {
+                        $this->redirectRoute('error-accessDenied');
+                    } else {
+                        echo "1";
+                        $this->executeFunction($this->route->getFunction());
+                    }
+                } else {
+                    $this->redirectRoute('view-signIn');
+                }
+            } else {
+                $this->executeFunction($this->route->getFunction());
             }
-        } else {
-
-            if ($this->checkUserLogin() === true) {
-                $this->redirectHomeRoute();
-            }
         }
-
-        $this->executeRouteFunction();
-    }
-
-    private function identifyRoute(): void
-    {
-        $this->getRoute()->identify();
-    }
-
-    private function validateRoute($routeName)
-    {
-        return isset($this->routes[$routeName]);
-    }
-
-    private function redirectRoute($routeName)
-    {
-        $url = '';
-        if ($this->validateRoute($routeName) === true) {
-            $url = $this->routes[$routeName]->getUrl();
-        } else {
-            $url = $this->getRoutes('error-invalidRoute')->getUrl();
-        }
-        header('Location: ' . $url);
-        die();
-    }
-
-    private function addRoute($object, $process, $function)
-    {
-        $route = new Route($object, $process, $function);
-        $this->routes[$route->getName()] = $route;
-    }
-
-    private function initializeRoutes()
-    {
-        $this->addRoute('error', 'invalidRoute', function () {
-            echo "RUTA INVALIDA";
-        });
-    }
-
-    private function checkUserAccessWithRouteAccessControl()
-    {
-        return password_verify($this->getUserAccessKey(),$this->getRoute()->getAccessKey());
-    }
-
-    private function getUserAccessKey()
-    {
-        if($this->checkSessionController()===false){
-            $this->setSessionController(new SessionController());
-        }
-        $this->getSessionController()->getPasswordOfLoggedInUser();
     }
 }

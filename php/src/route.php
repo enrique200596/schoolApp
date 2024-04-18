@@ -4,87 +4,91 @@ class Route
     private $object;
     private $process;
     private $function;
-    private $accessControl;
+    private $accessKey;
 
-    public function __construct($object = '', $process = '', $function = null, $accessControl = null)
+    public function __construct(string $object = '', string $process = '', string $accessKey = '')
     {
         $this->setObject($object);
         $this->setProcess($process);
-        $this->setFunction($function);
-        $this->setAccessControl($accessControl);
+        $this->setFunction($object . '-' . $process);
+        $this->setAccessKey($accessKey);
     }
 
-    private function setObject($object)
+    public function setObject(string $object)
     {
+        //Define la propiedad 'object' de la ruta.
         $this->object = $object;
     }
 
-    private function getObject()
+    public function setProcess(string $process)
     {
-        return $this->object;
-    }
-
-    private function setProcess($process)
-    {
+        //Define la propiedad 'process' de la ruta.
         $this->process = $process;
     }
 
-    private function getProcess()
+    public function setFunction(string $function)
     {
-        return $this->process;
-    }
-
-    private function setFunction($function)
-    {
+        //Define la propiedad 'function' de la ruta.
         $this->function = $function;
     }
 
-    private function getFunction()
+    public function setAccessKey(string $accessKey)
     {
+        //Define la propiedad 'accessKey' de la ruta.
+        $this->accessKey = $accessKey;
+    }
+
+    public function getObject()
+    {
+        //Devuelve la propiedad 'object' de la ruta.
+        return $this->object;
+    }
+
+    public function getProcess()
+    {
+        //Devuelve la propiedad 'process' de la ruta.
+        return $this->process;
+    }
+
+    public function getFunction()
+    {
+        //Devuelve la propiedad 'function' de la ruta.
         return $this->function;
     }
 
-    private function setAccessControl($accessControl)
+    public function getaccessKey()
     {
-        $this->accessControl = $accessControl;
+        //Devuelve la propiedad 'accessKey' de la ruta.
+        return $this->accessKey;
     }
 
-    private function getAccessControl()
+    public function identifyObject(): void
     {
-        return $this->accessControl;
-    }
-
-    public function identify(): void
-    {
-        $this->identifyObject();
-        $this->identifyProcess();
-    }
-
-    private function identifyObject(): void
-    {
+        //Verifica si existe la variable $_GET['object']
         if (isset($_GET['object']) === true) {
+            //Si existe lo guarda en la propiedad 'object' de la ruta.
             $this->setObject($_GET['object']);
-        } else {
-            $this->setObject(null);
         }
     }
 
-    private function identifyProcess(): void
+    public function identifyProcess(): void
     {
+        //Verifica si existe la variable $_GET['process']
         if (isset($_GET['process']) === true) {
+            //Si existe lo guarda en la propiedad 'process' de la ruta.
             $this->setProcess($_GET['process']);
-        } else {
-            $this->setProcess(null);
         }
     }
 
     public function getName(): string
     {
+        //Devuelve el nombre de la ruta
         return $this->getObject() . '-' . $this->getProcess();
     }
 
-    public function checkAcessControl(): bool
+    public function getUrl(): string
     {
-        return !(($this->getAccessControl() === null));
+        //Devuelve la URL de la ruta
+        return "index.php?object=" . $this->getObject() . "&process=" . $this->getProcess();
     }
 }
