@@ -65,24 +65,35 @@ class App
         }
     }
 
+    private function checkRouteAccessControl(): bool
+    {
+        return $this->getRoute()->checkAcessControl();
+    }
+
     public function execute(): void
     {
         $this->identifyRoute();
+
         if ($this->validateRoute($this->getRoute()->getName()) === false) {
             $this->redirectRoute('error-invalidRoute');
         } else {
             $this->loadRoute();
         }
+
         $this->checkUserSession();
+
         if ($this->checkRouteAccessControl() === true) {
-            if ($this->checkUserAccessControlWithRouteAccessControl() === false) {
+
+            if ($this->checkUserAccessWithRouteAccessControl() === false) {
                 $this->redirectRoute('error-accessDenied');
             }
         } else {
+
             if ($this->checkUserLogin() === true) {
                 $this->redirectHomeRoute();
             }
         }
+
         $this->executeRouteFunction();
     }
 

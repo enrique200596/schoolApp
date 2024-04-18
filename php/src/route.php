@@ -4,12 +4,14 @@ class Route
     private $object;
     private $process;
     private $function;
+    private $accessControl;
 
-    public function __construct($object = '', $process = '', $function = null)
+    public function __construct($object = '', $process = '', $function = null, $accessControl = null)
     {
         $this->setObject($object);
         $this->setProcess($process);
         $this->setFunction($function);
+        $this->setAccessControl($accessControl);
     }
 
     private function setObject($object)
@@ -42,6 +44,16 @@ class Route
         return $this->function;
     }
 
+    private function setAccessControl($accessControl)
+    {
+        $this->accessControl = $accessControl;
+    }
+
+    private function getAccessControl()
+    {
+        return $this->accessControl;
+    }
+
     public function identify(): void
     {
         $this->identifyObject();
@@ -69,5 +81,10 @@ class Route
     public function getName()
     {
         return $this->getObject() . '-' . $this->getProcess();
+    }
+
+    public function checkAcessControl()
+    {
+        return ($this->getAccessControl() === null) ? false : true;
     }
 }
