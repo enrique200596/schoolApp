@@ -4,12 +4,14 @@ require_once 'routeController.php';
 require_once 'sessionController.php';
 require_once 'user.php';
 require_once 'view.php';
+require_once 'viewController.php';
 
 class App
 {
     private Route $route;
     private RouteController $routeController;
     private SessionController $sessionController;
+    private ViewController $viewController;
 
     public function __construct()
     {
@@ -21,6 +23,7 @@ class App
 
     private function initializeRoutes()
     {
+        $this->routeController->addRoute(new Route('', '', ''));
         $this->routeController->addRoute(new Route('error', 'accessDenied', ''));
         $this->routeController->addRoute(new Route('error', 'invalidRoute', ''));
         $this->routeController->addRoute(new Route('view', 'homeAdministrator', 'Administrator'));
@@ -80,6 +83,12 @@ class App
     {
         echo "RUTA INEXISTENTE";
     }
+    
+    private function viewHome()
+    {
+        echo "RUTA HOME SIN SESION";
+    }
+
     private function viewSignIn()
     {
         $this->viewController = new ViewController();
@@ -91,6 +100,10 @@ class App
             case 'error-invalidRoute':
                 $this->errorInvalidRoute();
                 die();
+
+            case '-':
+                $this->viewHome();
+                die;
 
             case 'view-signIn':
                 $this->viewSignIn();

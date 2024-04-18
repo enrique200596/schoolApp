@@ -1,24 +1,23 @@
 <?php
+require_once 'view.php';
+require_once 'component.php';
+
 class ViewController
 {
-    private $views;
+    private View $views;
 
-    private function checkView(string $viewName)
+    public function __construct()
     {
-        return isset($this->views[$viewName]);
+        $this->views = [];
     }
 
-    private function getView(string $viewName)
+    private function addView(string $viewName, View $v)
     {
-        if ($this->checkView($viewName) === false) {
-            $viewName = 'nonExistentView';
-        }
-        return $this->views[$viewName];
+        $this->views[$viewName] = $v;
     }
 
-    public function showView(string $viewName)
+    private function buildSignIn()
     {
-        $this->getView($viewName)->build();
-        $this->getView($viewName)->show();
+        $v=new View('Iniciar sesión')
     }
 }

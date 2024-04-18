@@ -1,22 +1,63 @@
 <?php
+require_once 'component.php';
+
 class View
 {
+    private $components;
     private $page;
 
-    public function build(string $viewName)
+    public function __construct(string $title)
     {
-        /*
-        1. Comprobar el nombre de la vista.
-        2. Si existe construir la vista en la propiedad $page,
-           si no existe construir la vista 'notFoundView' en la propiedad $page.
-        */
+        $this->components = [];
+
+        $this->addComponent('doctype', new Component('!DOCTYPE', ['noKey' => 'html']));
+
+        $this->addComponent(
+            'html',
+            new Component('html', ['lang' => 'es'], '', [
+                'head' => new Component('head', [], '', [
+                    'metaCharset' => new Component('meta', ['charset' => 'UTF-8']),
+                    'metaNameContent' => new Component('meta', ['name' => 'viewport', 'content' => 'width=device-width, initial-scale=1.0']),
+                    'title' => new Component('title', [], $title . ' - SinisterApp')
+                ]),
+                'body' => new Component('body', [], '', [
+                    'header' => new Component('header', [], '', [
+                        'h1' => new Component('h1', [], strtoupper($title)),
+                        'h2' => new Component('h1', [], 'SinisterApp')
+                    ]),
+                    'main' => new Component('main'),
+                    'footer' => new Component('footer')
+                ])
+            ])
+        );
+    }
+
+    private function setPage(string $page)
+    {
+        $this->page = $page;
+    }
+
+    private function getPage()
+    {
+        return $this->page;
+    }
+
+    private function addComponent(string $componentName, Component $c)
+    {
+        $this->components[$componentName] = $c;
+    }
+
+    public function getComponent(string $componentName)
+    {
+        if (isset($this->components[$componentName]) === true) {
+            return $this->components[$componentName];
+        } else {
+            return '';
+        }
     }
 
     public function show()
     {
-        /*
-        1. Imprimir contenido de la propiedad $page.
-        */
-        echo $this->page;
+        echo $this->getPage();
     }
 }
