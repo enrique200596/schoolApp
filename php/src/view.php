@@ -1,63 +1,60 @@
 <?php
-require_once 'component.php';
+require_once 'componentController.php';
 
 class View
 {
-    private $components;
-    private $page;
+    private array $viewComponents;
+    private string $title;
 
     public function __construct(string $title)
     {
-        $this->components = [];
-
-        $this->addComponent('doctype', new Component('!DOCTYPE', ['noKey' => 'html']));
-
-        $this->addComponent(
-            'html',
-            new Component('html', ['lang' => 'es'], '', [
-                'head' => new Component('head', [], '', [
-                    'metaCharset' => new Component('meta', ['charset' => 'UTF-8']),
-                    'metaNameContent' => new Component('meta', ['name' => 'viewport', 'content' => 'width=device-width, initial-scale=1.0']),
-                    'title' => new Component('title', [], $title . ' - SinisterApp')
-                ]),
-                'body' => new Component('body', [], '', [
-                    'header' => new Component('header', [], '', [
-                        'h1' => new Component('h1', [], strtoupper($title)),
-                        'h2' => new Component('h1', [], 'SinisterApp')
-                    ]),
-                    'main' => new Component('main'),
-                    'footer' => new Component('footer')
-                ])
-            ])
-        );
+        $this->setTitle($title);
     }
 
-    private function setPage(string $page)
+    public function getViewComponents(string $optionViewComponent = '*'): array|Component
     {
-        $this->page = $page;
-    }
-
-    private function getPage()
-    {
-        return $this->page;
-    }
-
-    private function addComponent(string $componentName, Component $c)
-    {
-        $this->components[$componentName] = $c;
-    }
-
-    public function getComponent(string $componentName)
-    {
-        if (isset($this->components[$componentName]) === true) {
-            return $this->components[$componentName];
+        if ($optionViewComponent === '*') {
+            return $this->viewComponents;
         } else {
-            return '';
+            if ($this->checkComponent($optionViewComponent) === true) {
+                return $this->viewComponents[$optionViewComponent];
+            } else {
+                return [];
+            }
         }
     }
 
-    public function show()
+    public function getTitle(): string
     {
-        echo $this->getPage();
+        return $this->title;
     }
+
+    public function setViewComponents(array $viewComponents): void
+    {
+        $this->viewComponents = $viewComponents;
+    }
+
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+
+    public function addComponent(string $componentName, Component $c)
+    {
+        $this->viewComponents[$componentName] = $c;
+    }
+
+    public function checkComponent(string $componentName)
+    {
+        return isset($this->viewComponents[$componentName]);
+    }
+
+    public function removeComponent(string $componentName)
+    {
+        if ($this->checkComponent($componentName) === true) {
+            unset($this->viewComponents[$componentName]);
+        }
+    }
+
+
 }

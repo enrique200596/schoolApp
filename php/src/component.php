@@ -1,4 +1,5 @@
 <?php
+
 class Component
 {
     private string $tag;
@@ -31,7 +32,7 @@ class Component
         return $this->value;
     }
 
-    public function getSubComponents(string $subComponentName = '*')
+    public function getSubComponents(string $subComponentName = '*'): array|Component
     {
         if ($subComponentName === '*') {
             return $this->subComponents;
@@ -39,7 +40,7 @@ class Component
             if (isset($this->subComponents[$subComponentName]) === true) {
                 return $this->subComponents[$subComponentName];
             } else {
-                return '';
+                return [];
             }
         }
     }
@@ -74,16 +75,27 @@ class Component
         $this->html = $html;
     }
 
-    public function addSubComponents(string $subComponentName, Component $subComponent)
+    public function addSubComponent(string $subComponentName, Component $subComponent): void
     {
         $this->subComponents[$subComponentName] = $subComponent;
     }
 
-    public function build()
+    private function checkSubComponent(string $subComponentName): bool
+    {
+        return isset($this->subComponents[$subComponentName]);
+    }
+
+    public function removeSubComponent(string $subComponentName): void
+    {
+        if ($this->checkSubComponent($subComponentName) === true) {
+            unset($this->subComponents[$subComponentName]);
+        }
+    }
+
+    public function build(): void
     {
         $attributes = '';
-
-        if (empty($this->getAttributes()) != true) {
+        if (!empty($this->getAttributes()) === true) {
             foreach ($this->getAttributes() as $key => $value) {
                 if ($key === 'noKey') {
                     $attributes = $attributes . ' ' . $value;
@@ -92,14 +104,12 @@ class Component
                 }
             }
         }
-
         $tag = $this->getTag();
-
         if ($tag === '!DOCTYPE' || $tag === 'input' || $tag === 'br' || $tag === 'hr' || $tag === 'meta') {
             $this->setHtml('<' . $tag . ' ' . $attributes . '>');
         } else {
             $value = '';
-            if (count($this->getSubComponents()) > 0) {
+            if (!empty($this->getSubComponents()) === true) {
                 foreach ($this->getSubComponents() as $key => $v) {
                     $v->build();
                     $value = $value . $v->getHtml();
