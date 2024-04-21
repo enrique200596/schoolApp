@@ -10,6 +10,11 @@ class RouteController
         $this->routes = [];
     }
 
+    public function setRoutes(array $routes)
+    {
+        $this->routes = $routes;
+    }
+
     public function addRoute(Route $r)
     {
         //Agrega una ruta a la lista de rutas de RouteController con su nombre de ruta.
@@ -29,7 +34,7 @@ class RouteController
             unset($this->routes[$routeName]);
     }
 
-    public function getRoute(string $routeName): Route|NULL
+    public function getRoute(string $routeName): Route|null
     {
         /*
         Devuelve una ruta específica de la lista de rutas de RouteController;

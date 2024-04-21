@@ -17,18 +17,22 @@ class App
     {
         $this->route = new Route();
         $this->routeController = new RouteController();
-        $this->initializeRoutes();
         $this->sessionController = new SessionController();
+        $this->initializeRoutes();
+        $this->sessionController->setData('routeController', $this->routeController);
     }
 
     private function initializeRoutes()
     {
-        $this->routeController->addRoute(new Route('', '', ''));
         $this->routeController->addRoute(new Route('error', 'accessDenied', ''));
         $this->routeController->addRoute(new Route('error', 'invalidRoute', ''));
+        $this->routeController->addRoute(new Route('user', 'signIn', ''));
+        $this->routeController->addRoute(new Route('user', 'signUn', ''));
         $this->routeController->addRoute(new Route('view', 'homeAdministrator', 'Administrator'));
         $this->routeController->addRoute(new Route('view', 'homeExecutive', 'Executive'));
         $this->routeController->addRoute(new Route('view', 'signIn', ''));
+        $this->routeController->addRoute(new Route('view', 'signUp', ''));
+        $this->routeController->addRoute(new Route('view', 'home', ''));
     }
 
     private function identifyRoute()
@@ -39,6 +43,10 @@ class App
 
     private function validateRoute()
     {
+        if ($this->route->getName() === '-') {
+            $this->route->setObject('view');
+            $this->route->setProcess('home');
+        }
         return $this->routeController->checkRoute($this->route->getName());
     }
 
@@ -83,10 +91,11 @@ class App
     {
         echo "RUTA INEXISTENTE";
     }
-    
+
     private function viewHome()
     {
-        echo "RUTA HOME SIN SESION";
+        $this->viewController = new ViewController();
+        $this->viewController->showView('homeWithoutSession');
     }
 
     private function viewSignIn()
@@ -94,6 +103,7 @@ class App
         $this->viewController = new ViewController();
         $this->viewController->showView('signIn');
     }
+
     private function executeFunction(string $routeName)
     {
         switch ($routeName) {
@@ -101,7 +111,7 @@ class App
                 $this->errorInvalidRoute();
                 die();
 
-            case '-':
+            case 'view-home':
                 $this->viewHome();
                 die;
 

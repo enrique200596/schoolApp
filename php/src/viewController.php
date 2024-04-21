@@ -1,6 +1,8 @@
 <?php
 require_once 'view.php';
 require_once 'component.php';
+require_once 'sessionController.php';
+require_once 'routeController.php';
 
 class ViewController
 {
@@ -9,12 +11,392 @@ class ViewController
     public function __construct()
     {
         $this->views = [];
+        $sc = new SessionController();
+        $rc = $sc->getData('routeController');
+        $sc->removeData('routeController');
+        unset($sc);
 
         //CREACION DE VISTA NO DEFINIDA
-        $v = new View(
-            'Página no definida'
-        );
+        $c = new Component('main');
+        $c->addSubComponent(
+            'p',
+            new Component(
+                'p',
+                [],
+                'La vista que solicita no está definida.'
+            )
+        ); //p
+        $c->addSubComponent(
+            'h3',
+            new Component(
+                'h3',
+                [],
+                'Opciones'
+            )
+        ); //h3
+        $c->addSubComponent(
+            'ul',
+            new Component(
+                'ul'
+            )
+        ); //ul
+        $c->getSubComponents(
+            'ul'
+        )->addSubComponent(
+            'li1',
+            new Component(
+                'li'
+            )
+        ); //li1
+        $c->getSubComponents(
+            'ul'
+        )->getSubComponents(
+            'li1'
+        )->addSubComponent(
+            'aHome',
+            new Component(
+                'a',
+                [
+                    'href' => $rc->getRoute('view-home')->getUrl()
+                ],
+                'Volver a inicio'
+            )
+        ); //aHome
+        $this->addView('notFoundView', 'Vista no encontrada', $c);
 
+        //CREACION DE VISTA DE INICIO SIN INICIAR SESION
+        $c = new Component('main');
+        $c->addSubComponent(
+            'h3',
+            new Component(
+                'h3',
+                [],
+                'Opciones:'
+            )
+        ); //h3
+        $c->addSubComponent(
+            'ul',
+            new Component(
+                'ul'
+            )
+        ); //ul
+        $c->getSubComponents(
+            'ul'
+        )->addSubComponent(
+            'li1',
+            new Component(
+                'li'
+            )
+        ); //li1
+        $c->getSubComponents(
+            'ul'
+        )->getSubComponents(
+            'li1'
+        )->addSubComponent(
+            'aHome',
+            new Component(
+                'a',
+                [
+                    'href' => $rc->getRoute('view-home')->getUrl()
+                ],
+                'Inicio'
+            )
+        ); //aHome
+        $c->getSubComponents(
+            'ul'
+        )->addSubComponent(
+            'li2',
+            new Component(
+                'li'
+            )
+        ); //li2
+        $c->getSubComponents(
+            'ul'
+        )->getSubComponents(
+            'li2'
+        )->addSubComponent(
+            'aSignIn',
+            new Component(
+                'a',
+                [
+                    'href' => $rc->getRoute('view-signIn')->getUrl()
+                ],
+                'Iniciar sesión'
+            )
+        ); //aSignIn
+        $c->getSubComponents(
+            'ul'
+        )->addSubComponent(
+            'li3',
+            new Component(
+                'li'
+            )
+        ); //li3
+        $c->getSubComponents(
+            'ul'
+        )->getSubComponents(
+            'li3'
+        )->addSubComponent(
+            'aRegisterUser',
+            new Component(
+                'a',
+                [
+                    'href' => $rc->getRoute('view-signUp')->getUrl()
+                ],
+                'Registrarse'
+            )
+        ); //aRegisterUser
+        $c->addSubComponent(
+            'p',
+            new Component(
+                'p',
+                [],
+                'Bienvenido a SinisterApp, la mejor aplicación para poder gestionar siniestros vehiculares.'
+            )
+        ); //p
+        $this->addView('homeWithoutSession', 'Inicio', $c);
+
+        //CREACION DE VISTA INICIAR SESION
+        $c = new Component('main');
+        $c->addSubComponent(
+            'h3',
+            new Component(
+                'h3',
+                [],
+                'Opciones:'
+            )
+        ); //h3
+        $c->addSubComponent(
+            'ul',
+            new Component(
+                'ul'
+            )
+        ); //ul
+        $c->getSubComponents(
+            'ul'
+        )->addSubComponent(
+            'li1',
+            new Component(
+                'li'
+            )
+        ); //li1
+        $c->getSubComponents(
+            'ul'
+        )->getSubComponents(
+            'li1'
+        )->addSubComponent(
+            'aHome',
+            new Component(
+                'a',
+                [
+                    'href' => $rc->getRoute('view-home')->getUrl()
+                ],
+                'Volver a inicio'
+            )
+        ); //aHome
+        $c->getSubComponents(
+            'ul'
+        )->addSubComponent(
+            'li2',
+            new Component(
+                'li'
+            )
+        ); //li2
+        $c->getSubComponents(
+            'ul'
+        )->getSubComponents(
+            'li2'
+        )->addSubComponent(
+            'aRegisterUser',
+            new Component(
+                'a',
+                [
+                    'href' => $rc->getRoute('view-signUp')->getUrl()
+                ],
+                'Registrarse'
+            )
+        ); //aRegisterUser
+        $c->addSubComponent(
+            'p',
+            new Component(
+                'p',
+                [],
+                'Para iniciar sesiòn debes rellenar el siguiente formulario.'
+            )
+        ); //p
+        $c->addSubComponent(
+            'form',
+            new Component(
+                'form',
+                [
+                    'method' => 'POST',
+                    'action' => $rc->getRoute('user-signIn')->getUrl()
+                ]
+            )); //form
+        $c->getSubComponents(
+            'form'
+        )->addSubComponent(
+            'sectionEmail',
+            new Component(
+                'section',
+                [
+                    'id' => 'sectionEmail'
+                ]
+            )
+        ); //sectionEmail
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionEmail'
+        )->addSubComponent(
+            'label',
+            new Component(
+                'label',
+                [
+                    'for' => 'inputEmail'
+                ],
+                'Correo electrónico'
+            )
+        ); //label
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionEmail'
+        )->addSubComponent(
+            'input',
+            new Component(
+                'input',
+                [
+                    'type' => 'email',
+                    'name' => 'email',
+                    'id' => 'inputEmail'
+                ]
+            )
+        ); //input
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionEmail'
+        )->addSubComponent(
+            'span',
+            new Component(
+                'span',
+                [],
+                'Notificación de email'
+            )
+        ); //span
+        $c->getSubComponents(
+            'form'
+        )->addSubComponent(
+            'sectionPassword',
+            new Component(
+                'section',
+                [
+                    'id' => 'sectionPassword'
+                ]
+            )
+        ); //sectionPassword
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionPassword'
+        )->addSubComponent(
+            'label',
+            new Component(
+                'label',
+                [
+                    'for' => 'inputPassword'
+                ],
+                'Contraseña'
+            )
+        ); //label
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionPassword'
+        )->addSubComponent(
+            'input',
+            new Component(
+                'input',
+                [
+                    'type' => 'password',
+                    'name' => 'password',
+                    'id' => 'inputPassword'
+                ]
+            )
+        ); //input
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionPassword'
+        )->addSubComponent(
+            'span',
+            new Component(
+                'span',
+                [],
+                'Notificación de password'
+            )
+        ); //span
+        $c->getSubComponents(
+            'form'
+        )->addSubComponent(
+            'sectionRememberMe',
+            new Component(
+                'section',
+                [
+                    'id' => 'sectionRememberMe'
+                ]
+            )
+        ); //sectionRememberMe
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionRememberMe'
+        )->addSubComponent(
+            'input',
+            new Component(
+                'input',
+                [
+                    'type' => 'checkbox',
+                    'name' => 'rememberMe',
+                    'id' => 'inputRememberMe'
+                ]
+            )
+        ); //input
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionRememberMe'
+        )->addSubComponent(
+            'label',
+            new Component(
+                'label',
+                [
+                    'for' => 'inputRememberMe'
+                ],
+                'Recordarme en este dispositivo'
+            )
+        ); //label
+        $c->getSubComponents(
+            'form'
+        )->addSubComponent(
+            'input',
+            new Component(
+                'input',
+                [
+                    'type' => 'submit',
+                    'value' => 'INICIAR SESION',
+                ]
+            )
+        ); //input
+        $this->addView('signIn', 'Iniciar sesiòn', $c);
+    }
+
+    private function addView(string $viewName, string $title, Component $mainContent): void
+    {
+        $v = new View(
+            $title
+        );
         $v->addComponent(
             'doctype',
             new Component(
@@ -23,8 +405,7 @@ class ViewController
                     'noKey' => 'html'
                 ]
             )
-        );
-
+        ); //DOCTYPE
         $v->addComponent(
             'html',
             new Component(
@@ -33,8 +414,7 @@ class ViewController
                     'lang' => 'es'
                 ]
             )
-        );
-
+        ); //html
         $v->getViewComponents(
             'html'
         )->addSubComponent(
@@ -42,8 +422,7 @@ class ViewController
             new Component(
                 'head'
             )
-        );
-
+        ); //head
         $v->getViewComponents(
             'html'
         )->getSubComponents(
@@ -56,8 +435,7 @@ class ViewController
                     'charset' => 'UTF-8'
                 ]
             )
-        );
-
+        ); //meta1
         $v->getViewComponents(
             'html'
         )->getSubComponents(
@@ -71,8 +449,7 @@ class ViewController
                     'content' => 'width=device-width, initial-scale=1.0'
                 ]
             )
-        );
-
+        ); //meta2
         $v->getViewComponents(
             'html'
         )->getSubComponents(
@@ -84,8 +461,7 @@ class ViewController
                 [],
                 $v->getTitle()
             )
-        );
-
+        ); //title
         $v->getViewComponents(
             'html'
         )->addSubComponent(
@@ -93,8 +469,7 @@ class ViewController
             new Component(
                 'body'
             )
-        );
-
+        ); //body
         $v->getViewComponents(
             'html'
         )->getSubComponents(
@@ -104,8 +479,7 @@ class ViewController
             new Component(
                 'header'
             )
-        );
-
+        ); //header
         $v->getViewComponents(
             'html'
         )->getSubComponents(
@@ -121,8 +495,7 @@ class ViewController
                     $v->getTitle()
                 )
             )
-        );
-
+        ); //h1
         $v->getViewComponents(
             'html'
         )->getSubComponents(
@@ -136,98 +509,15 @@ class ViewController
                 [],
                 'SinisterApp'
             )
-        );
-
+        ); //h2
         $v->getViewComponents(
             'html'
         )->getSubComponents(
             'body'
         )->addSubComponent(
             'main',
-            new Component(
-                'main'
-            )
-        );
-
-        $v->getViewComponents(
-            'html'
-        )->getSubComponents(
-            'body'
-        )->getSubComponents(
-            'main'
-        )->addSubComponent(
-            'p',
-            new Component(
-                'p',
-                [],
-                'La vista que solicita no está definida.'
-            )
-        );
-
-        $v->getViewComponents(
-            'html'
-        )->getSubComponents(
-            'body'
-        )->getSubComponents(
-            'main'
-        )->addSubComponent(
-            'h3',
-            new Component(
-                'h2',
-                [],
-                'Opciones'
-            )
-        );
-
-        $v->getViewComponents(
-            'html'
-        )->getSubComponents(
-            'body'
-        )->getSubComponents(
-            'main'
-        )->addSubComponent(
-            'ul',
-            new Component(
-                'ul'
-            )
-        );
-
-        $v->getViewComponents(
-            'html'
-        )->getSubComponents(
-            'body'
-        )->getSubComponents(
-            'main'
-        )->getSubComponents(
-            'ul'
-        )->addSubComponent(
-            'liHome',
-            new Component(
-                'li'
-            )
-        );
-
-        $v->getViewComponents(
-            'html'
-        )->getSubComponents(
-            'body'
-        )->getSubComponents(
-            'main'
-        )->getSubComponents(
-            'ul'
-        )->getSubComponents(
-            'liHome'
-        )->addSubComponent(
-            'a',
-            new Component(
-                'a',
-                [
-                    'href' => '#'
-                ],
-                'Volver a inicio'
-            )
-        );
-
+            $mainContent
+        ); //main
         $v->getViewComponents(
             'html'
         )->getSubComponents(
@@ -237,8 +527,7 @@ class ViewController
             new Component(
                 'footer'
             )
-        );
-
+        ); //footer
         $v->getViewComponents(
             'html'
         )->getSubComponents(
@@ -250,8 +539,7 @@ class ViewController
             new Component(
                 'ul'
             )
-        );
-
+        ); //ul
         $v->getViewComponents(
             'html'
         )->getSubComponents(
@@ -265,8 +553,7 @@ class ViewController
             new Component(
                 'li'
             )
-        );
-
+        ); //li1
         $v->getViewComponents(
             'html'
         )->getSubComponents(
@@ -276,9 +563,9 @@ class ViewController
         )->getSubComponents(
             'ul'
         )->getSubComponents(
-            'li'
+            'li1'
         )->addSubComponent(
-            'a',
+            'aAboutUs',
             new Component(
                 'a',
                 [
@@ -286,11 +573,55 @@ class ViewController
                 ],
                 'Acerca de nosotros'
             )
-        );
-    }
-
-    private function addView(string $viewName, View $v): void
-    {
+        ); //aAboutUs
+        $v->getViewComponents(
+            'html'
+        )->getSubComponents(
+            'body'
+        )->getSubComponents(
+            'footer'
+        )->getSubComponents(
+            'ul'
+        )->addSubComponent(
+            'li2',
+            new Component(
+                'li'
+            )
+        ); //li2
+        $v->getViewComponents(
+            'html'
+        )->getSubComponents(
+            'body'
+        )->getSubComponents(
+            'footer'
+        )->getSubComponents(
+            'ul'
+        )->getSubComponents(
+            'li2'
+        )->addSubComponent(
+            'aContactUs',
+            new Component(
+                'a',
+                [
+                    'href' => '#'
+                ],
+                'Contáctanos'
+            )
+        ); //aContactUs
+        $v->getViewComponents(
+            'html'
+        )->getSubComponents(
+            'body'
+        )->getSubComponents(
+            'footer'
+        )->addSubComponent(
+            'span',
+            new Component(
+                'span',
+                [],
+                'Illesoft © Derechos reservados'
+            )
+        ); //span
         $this->views[$viewName] = $v;
     }
 
@@ -299,7 +630,7 @@ class ViewController
         return isset($this->views[$viewName]);
     }
 
-    private function getView(string $viewName)
+    private function getView(string $viewName): View
     {
         if ($this->checkView($viewName) === false) {
             $viewName = 'notFoundView';

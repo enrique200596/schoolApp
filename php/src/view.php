@@ -1,5 +1,5 @@
 <?php
-require_once 'componentController.php';
+require_once 'component.php';
 
 class View
 {
@@ -39,22 +39,30 @@ class View
         $this->title = $title;
     }
 
-    public function addComponent(string $componentName, Component $c)
+    public function addComponent(string $componentName, Component $c): void
     {
         $this->viewComponents[$componentName] = $c;
     }
 
-    public function checkComponent(string $componentName)
+    public function checkComponent(string $componentName): bool
     {
         return isset($this->viewComponents[$componentName]);
     }
 
-    public function removeComponent(string $componentName)
+    public function removeComponent(string $componentName): void
     {
         if ($this->checkComponent($componentName) === true) {
             unset($this->viewComponents[$componentName]);
         }
     }
 
-
+    public function show(): void
+    {
+        $page = '';
+        foreach ($this->getViewComponents() as $component) {
+            $component->build();
+            $page = $page . $component->getHtml();
+        }
+        echo $page;
+    }
 }
