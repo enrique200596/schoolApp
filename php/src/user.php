@@ -50,4 +50,12 @@ class User
         $conecction->close();
         return $result;
     }
+
+    public function checkEmail()
+    {
+        $connection = new mysqli('db', 'root', '123456', 'sinister');
+        $result = $connection->query("SELECT * FROM users WHERE email='" . $this->getEmail() . "'");
+        $connection->close();
+        return $result;
+    }
 }

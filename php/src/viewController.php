@@ -2,24 +2,72 @@
 require_once 'view.php';
 require_once 'component.php';
 require_once 'routeController.php';
+require_once 'notificationController.php';
 
 class ViewController
 {
     private array $views;
 
-    public function __construct(RouteController $rc)
+    public function __construct(RouteController $rc, NotificationController $nc)
     {
         $this->views = [];
-        $rc = $rc;
 
-        //CREACION DE VISTA NO DEFINIDA
+        //CREACION DE VISTA notificationView
         $c = new Component('main');
         $c->addSubComponent(
             'p',
             new Component(
                 'p',
                 [],
-                'La vista que solicita no está definida.'
+                $nc->getNotification('notificationView')->getMessage()
+            )
+        ); //p
+        $c->addSubComponent(
+            'h3',
+            new Component(
+                'h3',
+                [],
+                'Opciones'
+            )
+        ); //h3
+        $c->addSubComponent(
+            'ul',
+            new Component(
+                'ul'
+            )
+        ); //ul
+        $c->getSubComponents(
+            'ul'
+        )->addSubComponent(
+            'li1',
+            new Component(
+                'li'
+            )
+        ); //li1
+        $c->getSubComponents(
+            'ul'
+        )->getSubComponents(
+            'li1'
+        )->addSubComponent(
+            'aHome',
+            new Component(
+                'a',
+                [
+                    'href' => $rc->getRoute('view-home')->getUrl()
+                ],
+                'Volver a inicio'
+            )
+        ); //aHome
+        $this->addView('notificationView', $nc->getNotification('notificationView')->getTitle(), $c);
+
+        //CREACION DE VISTA notFoundView
+        $c = new Component('main');
+        $c->addSubComponent(
+            'p',
+            new Component(
+                'p',
+                [],
+                'La vista que solicita no existe.'
             )
         ); //p
         $c->addSubComponent(
@@ -59,54 +107,6 @@ class ViewController
             )
         ); //aHome
         $this->addView('notFoundView', 'Vista no encontrada', $c);
-
-        //CREACION DE VISTA "RUTA SIN METODO DE EJECUCION"
-        $c = new Component('main');
-        $c->addSubComponent(
-            'p',
-            new Component(
-                'p',
-                [],
-                'La ruta que solicita no tiene método de ejecución.'
-            )
-        ); //p
-        $c->addSubComponent(
-            'h3',
-            new Component(
-                'h3',
-                [],
-                'Opciones'
-            )
-        ); //h3
-        $c->addSubComponent(
-            'ul',
-            new Component(
-                'ul'
-            )
-        ); //ul
-        $c->getSubComponents(
-            'ul'
-        )->addSubComponent(
-            'li1',
-            new Component(
-                'li'
-            )
-        ); //li1
-        $c->getSubComponents(
-            'ul'
-        )->getSubComponents(
-            'li1'
-        )->addSubComponent(
-            'aHome',
-            new Component(
-                'a',
-                [
-                    'href' => $rc->getRoute('view-home')->getUrl()
-                ],
-                'Volver a inicio'
-            )
-        ); //aHome
-        $this->addView('nonExistentRouteFunction', 'Error en la ruta', $c);
 
         //CREACION DE VISTA DE INICIO SIN INICIAR SESION
         $c = new Component('main');
@@ -327,7 +327,7 @@ class ViewController
             new Component(
                 'span',
                 [],
-                'Notificación de email'
+                ($nc->getNotification('spanSignInEmail')->getMessage() === null) ? '' : $nc->getNotification('spanSignInEmail')->getMessage()
             )
         ); //span
         $c->getSubComponents(
@@ -379,7 +379,7 @@ class ViewController
             new Component(
                 'span',
                 [],
-                'Notificación de password'
+                ($nc->getNotification('spanSignInPassword')->getMessage() === null) ? '' : $nc->getNotification('spanSignInPassword')->getMessage()
             )
         ); //span
         $c->getSubComponents(
@@ -563,7 +563,7 @@ class ViewController
             new Component(
                 'span',
                 [],
-                'Notificación de name'
+                ($nc->getNotification('spanSignUpName')->getMessage() === null) ? '' : $nc->getNotification('spanSignUpName')->getMessage()
             )
         ); //span
         $c->getSubComponents(
@@ -615,7 +615,7 @@ class ViewController
             new Component(
                 'span',
                 [],
-                'Notificación de email'
+                ($nc->getNotification('spanSignUpEmail')->getMessage() === null) ? '' : $nc->getNotification('spanSignUpEmail')->getMessage()
             )
         ); //span
         $c->getSubComponents(
@@ -667,7 +667,7 @@ class ViewController
             new Component(
                 'span',
                 [],
-                'Notificación de password'
+                ($nc->getNotification('spanSignUpPassword')->getMessage() === null) ? '' : $nc->getNotification('spanSignUpPassword')->getMessage()
             )
         ); //span
         $c->getSubComponents(
@@ -719,7 +719,7 @@ class ViewController
             new Component(
                 'span',
                 [],
-                'Notificación de passwordVerify'
+                ($nc->getNotification('spanSignUpPasswordVerify')->getMessage() === null) ? '' : $nc->getNotification('spanSignUpPasswordVerify')->getMessage()
             )
         ); //span
         $c->getSubComponents(
@@ -970,7 +970,7 @@ class ViewController
         $this->views[$viewName] = $v;
     }
 
-    private function checkView(string $viewName)
+    private function checkView(string $viewName): bool
     {
         return isset($this->views[$viewName]);
     }
@@ -983,7 +983,7 @@ class ViewController
         return $this->views[$viewName];
     }
 
-    public function showView(string $viewName)
+    public function showView(string $viewName): void
     {
         $this->getView($viewName)->show();
     }

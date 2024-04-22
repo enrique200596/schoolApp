@@ -22,10 +22,15 @@ class App
         $this->sessionController->setData('routeController', $this->routeController);
     }
 
-    private function initializeRoutes()
+    private function initializeRoutes(): void
     {
         $this->routeController->addRoute(new Route('error', 'accessDenied', ''));
         $this->routeController->addRoute(new Route('error', 'invalidRoute', ''));
+        $this->routeController->addRoute(new Route('error', 'signInEmailNotFound', ''));
+        $this->routeController->addRoute(new Route('error', 'signInPasswordIncorrect', ''));
+        $this->routeController->addRoute(new Route('error', 'signUp', ''));
+        $this->routeController->addRoute(new Route('error', 'signUpPasswordVerify', ''));
+        $this->routeController->addRoute(new Route('successful', 'signUp', ''));
         $this->routeController->addRoute(new Route('user', 'signIn', ''));
         $this->routeController->addRoute(new Route('user', 'signUp', ''));
         $this->routeController->addRoute(new Route('view', 'home', ''));
@@ -35,13 +40,13 @@ class App
         $this->routeController->addRoute(new Route('view', 'signUp', ''));
     }
 
-    private function identifyRoute()
+    private function identifyRoute(): void
     {
         $this->route->identifyObject();
         $this->route->identifyProcess();
     }
 
-    private function validateRoute()
+    private function validateRoute(): bool
     {
         if ($this->route->getName() === '-') {
             $this->route->setObject('view');
@@ -50,7 +55,7 @@ class App
         return $this->routeController->checkRoute($this->route->getName());
     }
 
-    private function redirectRoute(string $routeName)
+    private function redirectRoute(string $routeName): void
     {
         if ($this->validateRoute($routeName) === false) {
             $routeName = 'error-invalidRoute';
@@ -59,7 +64,7 @@ class App
         die();
     }
 
-    private function checkRouteAccessKey()
+    private function checkRouteAccessKey(): bool
     {
         if (empty($this->route->getAccessKey()) === true) {
             return false;
@@ -68,7 +73,7 @@ class App
         }
     }
 
-    private function checkUserSession()
+    private function checkUserSession(): bool
     {
         if ($this->sessionController->getData('user') === null) {
             return false;
@@ -77,17 +82,17 @@ class App
         }
     }
 
-    private function checkUserAccessKeyRouteAccessKey()
+    private function checkUserAccessKeyRouteAccessKey(): bool
     {
         return password_verify($this->route->getaccessKey(), $this->sessionController->getData('user')->getAccessKey());
     }
 
-    private function errorInvalidRoute()
+    private function errorInvalidRoute(): void
     {
         echo "RUTA NO VALIDA";
     }
 
-    private function userSignUp()
+    private function userSignUp(): void
     {
         if ($_POST['password'] === $_POST['passwordVerify']) {
             $user = new User();
@@ -95,7 +100,7 @@ class App
             $user->setEmail($_POST['email']);
             $user->setPassword(password_hash($_POST['password'], PASSWORD_DEFAULT));
             if ($user->store() === true) {
-                $this->redirectRoute('succesfull-signUp');
+                $this->redirectRoute('successful-signUp');
             } else {
                 $this->redirectRoute('error-signUp');
             }
@@ -104,27 +109,33 @@ class App
         }
     }
 
-    private function viewNonExistentRouteFunction()
+    private function viewNonExistentRouteFunction(): void
     {
-        $this->viewController = new ViewController($this->routeController);
-        $this->viewController->showView('nonExistentRouteFunction');
+        $nc = new NotificationController();
+        $nc->addNotification(
+            'notificationView',
+            'error',
+            'Funcion de ruta inexistente',
+            'No existe o no está declarado el método o la función de la ruta solicitada.');
+        $this->viewController = new ViewController($this->routeController, $nc);
+        $this->viewController->showView('notificationView');
     }
 
     private function viewHome()
     {
-        $this->viewController = new ViewController($this->routeController);
+        $this->viewController = new ViewController($this->routeController, new NotificationController());
         $this->viewController->showView('homeWithoutSession');
     }
 
     private function viewSignIn()
     {
-        $this->viewController = new ViewController($this->routeController);
+        $this->viewController = new ViewController($this->routeController, new NotificationController());
         $this->viewController->showView('signIn');
     }
 
     private function viewSignUp()
     {
-        $this->viewController = new ViewController($this->routeController);
+        $this->viewController = new ViewController($this->routeController, new NotificationController());
         $this->viewController->showView('signUp');
     }
 
@@ -133,6 +144,30 @@ class App
         switch ($routeName) {
             case 'error-invalidRoute':
                 $this->errorInvalidRoute();
+                die();
+
+            case 'error-signInEmailNotFound':
+                $this->errorSignInEmailNotFound();
+                die();
+
+            case 'error-signInPasswordIncorrect':
+                $this->errorSignInPasswordIncorrect();
+                die();
+
+            case 'error-signUp':
+                $this->errorSignUp();
+                die();
+
+            case 'error-signUpPasswordVerify':
+                $this->errorSignUpPasswordVerify();
+                die();
+
+            case 'successful-signUp':
+                $this->viewSuccessfulSignUp();
+                die();
+
+            case 'user-signIn':
+                $this->userSignIn();
                 die();
 
             case 'user-signUp':
@@ -184,5 +219,70 @@ class App
                 $this->executeFunction($this->route->getFunction());
             }
         }
+    }
+
+    private function errorSignUpPasswordVerify()
+    {
+        $nc = new NotificationController();
+        $nc->addNotification('spanSignUpPasswordVerify', 'error', '', 'Las contraseñas no coinciden.');
+        $this->viewController = new ViewController($this->routeController, $nc);
+        $this->viewController->showView('signUp');
+    }
+
+    private function viewSuccessfulSignUp(): void
+    {
+        $nc = new NotificationController();
+        $nc->addNotification(
+            'notificationView',
+            'successfull',
+            'Registro de usuario exitoso',
+            'El usuario ha sido registrado con éxito, debes aguardar hasta que los administradores habiliten tu usuario.');
+        $this->viewController = new ViewController($this->routeController, $nc);
+        $this->viewController->showView('notificationView');
+    }
+
+    private function userSignIn()
+    {
+        $user = new User();
+        $user->setEmail($_POST['email']);
+        $result = $user->checkEmail();
+        if ($result->num_rows > 0) {
+            $result = $result->fetch_array();
+            if (password_verify($_POST['password'], $result['password']) === true) {
+                echo "ESTAS LOGUEADO";
+            } else {
+                $this->redirectRoute('error-signInPasswordIncorrect');
+            }
+        } else {
+            $this->redirectRoute('error-signInEmailNotFound');
+        }
+    }
+
+    private function errorSignUp()
+    {
+        $nc = new NotificationController();
+        $nc->addNotification(
+            'notificationView',
+            'error',
+            'Error en el registro de usuario',
+            'El usuario no ha podido ser registrado con éxito porque hubo un error en el almacenamiento de los datos, intente en un para de horas o consulte con los administradores.');
+        $this->viewController = new ViewController($this->routeController, $nc);
+        $this->viewController->showView('notificationView');
+    }
+
+    private function errorSignInEmailNotFound()
+    {
+        $nc = new NotificationController();
+        $nc->addNotification('spanSignInEmail', 'error', '', 'El correo electrónico no está registrado.');
+        $this->viewController = new ViewController($this->routeController, $nc);
+        $this->viewController->showView('signIn');
+    }
+
+    private function errorSignInPasswordIncorrect()
+    {
+        $nc = new NotificationController();
+        $nc->addNotification('spanSignInPassword', 'error', '', 'La constraseña es incorrecta.');
+        $this->viewController = new ViewController($this->routeController, $nc);
+        $this->viewController->showView('signIn');
     }
 }
