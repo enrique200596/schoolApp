@@ -27,12 +27,12 @@ class App
         $this->routeController->addRoute(new Route('error', 'accessDenied', ''));
         $this->routeController->addRoute(new Route('error', 'invalidRoute', ''));
         $this->routeController->addRoute(new Route('user', 'signIn', ''));
-        $this->routeController->addRoute(new Route('user', 'signUn', ''));
+        $this->routeController->addRoute(new Route('user', 'signUp', ''));
+        $this->routeController->addRoute(new Route('view', 'home', ''));
         $this->routeController->addRoute(new Route('view', 'homeAdministrator', 'Administrator'));
         $this->routeController->addRoute(new Route('view', 'homeExecutive', 'Executive'));
         $this->routeController->addRoute(new Route('view', 'signIn', ''));
         $this->routeController->addRoute(new Route('view', 'signUp', ''));
-        $this->routeController->addRoute(new Route('view', 'home', ''));
     }
 
     private function identifyRoute()
@@ -87,21 +87,28 @@ class App
         echo "RUTA NO VALIDA";
     }
 
-    private function nonExistentRoute()
+    private function viewNonExistentRouteFunction()
     {
-        echo "RUTA INEXISTENTE";
+        $this->viewController = new ViewController($this->routeController);
+        $this->viewController->showView('nonExistentRouteFunction');
     }
 
     private function viewHome()
     {
-        $this->viewController = new ViewController();
+        $this->viewController = new ViewController($this->routeController);
         $this->viewController->showView('homeWithoutSession');
     }
 
     private function viewSignIn()
     {
-        $this->viewController = new ViewController();
+        $this->viewController = new ViewController($this->routeController);
         $this->viewController->showView('signIn');
+    }
+
+    private function viewSignUp()
+    {
+        $this->viewController = new ViewController($this->routeController);
+        $this->viewController->showView('signUp');
     }
 
     private function executeFunction(string $routeName)
@@ -119,8 +126,12 @@ class App
                 $this->viewSignIn();
                 die();
 
+            case 'view-signUp':
+                $this->viewSignUp();
+                die();
+
             default:
-                $this->nonExistentRoute();
+                $this->viewNonExistentRouteFunction();
                 die();
         }
     }

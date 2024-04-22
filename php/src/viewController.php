@@ -1,20 +1,16 @@
 <?php
 require_once 'view.php';
 require_once 'component.php';
-require_once 'sessionController.php';
 require_once 'routeController.php';
 
 class ViewController
 {
     private array $views;
 
-    public function __construct()
+    public function __construct(RouteController $rc)
     {
         $this->views = [];
-        $sc = new SessionController();
-        $rc = $sc->getData('routeController');
-        $sc->removeData('routeController');
-        unset($sc);
+        $rc = $rc;
 
         //CREACION DE VISTA NO DEFINIDA
         $c = new Component('main');
@@ -63,6 +59,54 @@ class ViewController
             )
         ); //aHome
         $this->addView('notFoundView', 'Vista no encontrada', $c);
+
+        //CREACION DE VISTA "RUTA SIN METODO DE EJECUCION"
+        $c = new Component('main');
+        $c->addSubComponent(
+            'p',
+            new Component(
+                'p',
+                [],
+                'La ruta que solicita no tiene método de ejecución.'
+            )
+        ); //p
+        $c->addSubComponent(
+            'h3',
+            new Component(
+                'h3',
+                [],
+                'Opciones'
+            )
+        ); //h3
+        $c->addSubComponent(
+            'ul',
+            new Component(
+                'ul'
+            )
+        ); //ul
+        $c->getSubComponents(
+            'ul'
+        )->addSubComponent(
+            'li1',
+            new Component(
+                'li'
+            )
+        ); //li1
+        $c->getSubComponents(
+            'ul'
+        )->getSubComponents(
+            'li1'
+        )->addSubComponent(
+            'aHome',
+            new Component(
+                'a',
+                [
+                    'href' => $rc->getRoute('view-home')->getUrl()
+                ],
+                'Volver a inicio'
+            )
+        ); //aHome
+        $this->addView('nonExistentRouteFunction', 'Error en la ruta', $c);
 
         //CREACION DE VISTA DE INICIO SIN INICIAR SESION
         $c = new Component('main');
@@ -232,7 +276,8 @@ class ViewController
                     'method' => 'POST',
                     'action' => $rc->getRoute('user-signIn')->getUrl()
                 ]
-            )); //form
+            )
+        ); //form
         $c->getSubComponents(
             'form'
         )->addSubComponent(
@@ -389,7 +434,307 @@ class ViewController
                 ]
             )
         ); //input
-        $this->addView('signIn', 'Iniciar sesiòn', $c);
+        $this->addView('signIn', 'Iniciar sesión', $c);
+
+        //CREACION DE VISTA REGISTRARSE
+        $c = new Component('main');
+        $c->addSubComponent(
+            'h3',
+            new Component(
+                'h3',
+                [],
+                'Opciones:'
+            )
+        ); //h3
+        $c->addSubComponent(
+            'ul',
+            new Component(
+                'ul'
+            )
+        ); //ul
+        $c->getSubComponents(
+            'ul'
+        )->addSubComponent(
+            'li1',
+            new Component(
+                'li'
+            )
+        ); //li1
+        $c->getSubComponents(
+            'ul'
+        )->getSubComponents(
+            'li1'
+        )->addSubComponent(
+            'aHome',
+            new Component(
+                'a',
+                [
+                    'href' => $rc->getRoute('view-home')->getUrl()
+                ],
+                'Volver a inicio'
+            )
+        ); //aHome
+        $c->getSubComponents(
+            'ul'
+        )->addSubComponent(
+            'li2',
+            new Component(
+                'li'
+            )
+        ); //li2
+        $c->getSubComponents(
+            'ul'
+        )->getSubComponents(
+            'li2'
+        )->addSubComponent(
+            'aSignInUser',
+            new Component(
+                'a',
+                [
+                    'href' => $rc->getRoute('view-signIn')->getUrl()
+                ],
+                'Iniciar sesión'
+            )
+        ); //aRegisterUser
+        $c->addSubComponent(
+            'p',
+            new Component(
+                'p',
+                [],
+                'Para registrarte como nuevo usuario, debes rellenar el siguiente formulario.'
+            )
+        ); //p
+        $c->addSubComponent(
+            'form',
+            new Component(
+                'form',
+                [
+                    'method' => 'POST',
+                    'action' => $rc->getRoute('user-signUp')->getUrl()
+                ]
+            )
+        ); //form
+        $c->getSubComponents(
+            'form'
+        )->addSubComponent(
+            'sectionName',
+            new Component(
+                'section',
+                [
+                    'id' => 'sectionName'
+                ]
+            )
+        ); //sectionName
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionName'
+        )->addSubComponent(
+            'label',
+            new Component(
+                'label',
+                [
+                    'for' => 'inputName'
+                ],
+                'Nombre completo'
+            )
+        ); //label
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionName'
+        )->addSubComponent(
+            'input',
+            new Component(
+                'input',
+                [
+                    'type' => 'text',
+                    'name' => 'name',
+                    'id' => 'inputName'
+                ]
+            )
+        ); //input
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionName'
+        )->addSubComponent(
+            'span',
+            new Component(
+                'span',
+                [],
+                'Notificación de name'
+            )
+        ); //span
+        $c->getSubComponents(
+            'form'
+        )->addSubComponent(
+            'sectionEmail',
+            new Component(
+                'section',
+                [
+                    'id' => 'sectionEmail'
+                ]
+            )
+        ); //sectionEmail
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionEmail'
+        )->addSubComponent(
+            'label',
+            new Component(
+                'label',
+                [
+                    'for' => 'inputEmail'
+                ],
+                'Correo electrónico'
+            )
+        ); //label
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionEmail'
+        )->addSubComponent(
+            'input',
+            new Component(
+                'input',
+                [
+                    'type' => 'email',
+                    'name' => 'email',
+                    'id' => 'inputEmail'
+                ]
+            )
+        ); //input
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionEmail'
+        )->addSubComponent(
+            'span',
+            new Component(
+                'span',
+                [],
+                'Notificación de email'
+            )
+        ); //span
+        $c->getSubComponents(
+            'form'
+        )->addSubComponent(
+            'sectionPassword',
+            new Component(
+                'section',
+                [
+                    'id' => 'sectionPassword'
+                ]
+            )
+        ); //sectionPassword
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionPassword'
+        )->addSubComponent(
+            'label',
+            new Component(
+                'label',
+                [
+                    'for' => 'inputPassword'
+                ],
+                'Contraseña'
+            )
+        ); //label
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionPassword'
+        )->addSubComponent(
+            'input',
+            new Component(
+                'input',
+                [
+                    'type' => 'password',
+                    'name' => 'password',
+                    'id' => 'inputPassword'
+                ]
+            )
+        ); //input
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionPassword'
+        )->addSubComponent(
+            'span',
+            new Component(
+                'span',
+                [],
+                'Notificación de password'
+            )
+        ); //span
+        $c->getSubComponents(
+            'form'
+        )->addSubComponent(
+            'sectionPasswordVerify',
+            new Component(
+                'section',
+                [
+                    'id' => 'sectionPasswordVerify'
+                ]
+            )
+        ); //sectionPasswordVerify
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionPasswordVerify'
+        )->addSubComponent(
+            'label',
+            new Component(
+                'label',
+                [
+                    'for' => 'inputPasswordVerify'
+                ],
+                'Verificar contraseña'
+            )
+        ); //label
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionPasswordVerify'
+        )->addSubComponent(
+            'input',
+            new Component(
+                'input',
+                [
+                    'type' => 'password',
+                    'name' => 'passwordVerify',
+                    'id' => 'inputPasswordVerify'
+                ]
+            )
+        ); //input
+        $c->getSubComponents(
+            'form'
+        )->getSubComponents(
+            'sectionPasswordVerify'
+        )->addSubComponent(
+            'span',
+            new Component(
+                'span',
+                [],
+                'Notificación de passwordVerify'
+            )
+        ); //span
+        $c->getSubComponents(
+            'form'
+        )->addSubComponent(
+            'input',
+            new Component(
+                'input',
+                [
+                    'type' => 'submit',
+                    'value' => 'REGISTRARME',
+                ]
+            )
+        ); //input
+        $this->addView('signUp', 'Registrar usuario', $c);
     }
 
     private function addView(string $viewName, string $title, Component $mainContent): void
@@ -459,7 +804,7 @@ class ViewController
             new Component(
                 'title',
                 [],
-                $v->getTitle()
+                $v->getTitle() . ' - SinisterApp'
             )
         ); //title
         $v->getViewComponents(
