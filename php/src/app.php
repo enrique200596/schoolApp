@@ -87,6 +87,23 @@ class App
         echo "RUTA NO VALIDA";
     }
 
+    private function userSignUp()
+    {
+        if ($_POST['password'] === $_POST['passwordVerify']) {
+            $user = new User();
+            $user->setName($_POST['name']);
+            $user->setEmail($_POST['email']);
+            $user->setPassword(password_hash($_POST['password'], PASSWORD_DEFAULT));
+            if ($user->store() === true) {
+                $this->redirectRoute('succesfull-signUp');
+            } else {
+                $this->redirectRoute('error-signUp');
+            }
+        } else {
+            $this->redirectRoute('error-signUpPasswordVerify');
+        }
+    }
+
     private function viewNonExistentRouteFunction()
     {
         $this->viewController = new ViewController($this->routeController);
@@ -116,6 +133,10 @@ class App
         switch ($routeName) {
             case 'error-invalidRoute':
                 $this->errorInvalidRoute();
+                die();
+
+            case 'user-signUp':
+                $this->userSignUp();
                 die();
 
             case 'view-home':
